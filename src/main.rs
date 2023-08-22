@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
     // // Get a output stream handle to the default physical sound device
     // let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     // // Load a sound from a file, using a path relative to Cargo.toml
-    // let file = BufReader::new(File::open("music.flac").unwrap());
+    // let file = File::open("music.flac").unwrap();
     // // Decode that sound file into a source
     // let source = Decoder::new(file).unwrap();
     //
@@ -49,25 +49,45 @@ fn main() -> std::io::Result<()> {
 }
 
 fn handle_client(mut stream: TcpStream) -> std::io::Result<()>{
-    let mut buffer = String::new();
 
-    while buffer.as_str() != "close" {
+    let mut file = BufReader::new(File::open("music.flac").unwrap());
 
-        // buffer = String::from("");
-        //
-        // println!("test");
-        buffer = "".to_string();
-        match stream.read_to_string(&mut buffer)? {
-            // if it returs more then 1 byte
-            n if n != 0=> {
-               // client.write("hello world".as_bytes())?;
-                // print!("{}", &buffer[0..n]);
-                println!("{n} {}", &buffer);
-                // print!("");
-            }
-            _ => {}
-        }
+    let mut buffer = [0u8; 256];
+    let mut empty = false;
+    let mut send = 0;
+    while !empty {
+        match file.read(&mut buffer)? {
+            n if n != 0 => {
+                stream.write(&buffer)?;
+                buffer = [0u8; 256];
+                println!("sending");
+                send += n;
+                println!("{send}");
+            },
+            _ => empty = true,
+        };
     }
+
+    println!("done");
+
+    // let mut buffer = String::new();
+    // while buffer.as_str() != "close" {
+    //
+    //     // buffer = String::from("");
+    //     //
+    //     // println!("test");
+    //     buffer = "".to_string();
+    //     match stream.read_to_string(&mut buffer)? {
+    //         // if it returs more then 1 byte
+    //         n if n != 0=> {
+    //            // client.write("hello world".as_bytes())?;
+    //             // print!("{}", &buffer[0..n]);
+    //             println!("{n} {}", &buffer);
+    //             // print!("");
+    //         }
+    //         _ => {}
+    //     }
+    // }
 
     Ok(())
 }
