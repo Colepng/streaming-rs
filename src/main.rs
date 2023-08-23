@@ -1,31 +1,18 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::thread;
-use rodio::{Decoder, OutputStream, source::Source, Sink};
 use std::net::{TcpStream, TcpListener, SocketAddrV4, Ipv4Addr};
 use std::io::prelude::*;
+
+use rodio::{OutputStream, Decoder, Sink};
 
 const PORT: u16 = 6969;
 
 fn main() -> std::io::Result<()> {
-    // // Get a output stream handle to the default physical sound device
-    // let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    // // Load a sound from a file, using a path relative to Cargo.toml
-    // let file = File::open("music.flac").unwrap();
-    // // Decode that sound file into a source
-    // let source = Decoder::new(file).unwrap();
-    //
-    // let sink = Sink::try_new(&stream_handle).unwrap();
-    //
-    // // sink.append(source);
-
-
     let ip = Ipv4Addr::new(127, 0, 0, 1);
     let socket = SocketAddrV4::new(ip, PORT);
 
     let listener = TcpListener::bind(socket)?;
-
-    // let (mut client, addr) = listener.accept()?;
 
     for stream in listener.incoming() {
         match stream {
@@ -37,57 +24,59 @@ fn main() -> std::io::Result<()> {
             Err(e) => {println!("{:?}", e);}
         }
     }
-    // println!("asd");
 
-
-    // The sound plays in a separate audio thread,
-    // so we need to keep the main thread alive while it's playing.
-    // std::thread::sleep(std::time::Duration::from_secs(5));
-    // sink.pause();
-    // sink.sleep_until_end();
     Ok(())
 }
 
 fn handle_client(mut stream: TcpStream) -> std::io::Result<()>{
 
-    let mut file = BufReader::new(File::open("music.flac").unwrap());
 
-    let mut buffer = [0u8; 256];
+    
+    // Get a output stream handle to the default physical sound device
+    // let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    // Load a sound from a file, using a path relative to Cargo.toml
+    // let file = File::open("output_no_meta.mp3").unwrap();
+    // Decode that sound file into a source
+    // let source = Decoder::new_mp3(file).unwrap();
+    
+    // let sink = Sink::try_new(&stream_handle).unwrap();
+    
+    // sink.append(source);
+    // sink.sleep_until_end();
+    let mut file = BufReader::new(File::open("output_no_meta.mp3").unwrap());
+    //
+    let meta = mp3_metadata::read_from_file("output_no_meta.mp3").unwrap();
+    
+    
+    let frame = &meta.frames[0];
+    let bitrate = frame.bitrate as u32 * 1000;
+    let samp_rate = frame.sampling_freq;
+    let samples = frame.size;
+    
+    let bps = samples as f64 / 8.0;
+    
+    let fsize = (bps * bitrate as f64 / samp_rate as f64 ) + if frame.padding {1.} else {0.};
+    println!("{}", fsize);
+
+    let mut buffer = [0u8; 288];
+    // let mut buffer: Vec<u8> = Vec::new();
     let mut empty = false;
-    let mut send = 0;
+    let mut temp = 0;
     while !empty {
         match file.read(&mut buffer)? {
             n if n != 0 => {
-                stream.write(&buffer)?;
-                buffer = [0u8; 256];
-                println!("sending");
-                send += n;
-                println!("{send}");
+                stream.write(&buffer[0..n])?;
+                println!("sending {} bytes", n);
+                temp += 1;
+                if temp >= 400 {
+                    empty = true;
+                }
             },
             _ => empty = true,
         };
     }
 
     println!("done");
-
-    // let mut buffer = String::new();
-    // while buffer.as_str() != "close" {
-    //
-    //     // buffer = String::from("");
-    //     //
-    //     // println!("test");
-    //     buffer = "".to_string();
-    //     match stream.read_to_string(&mut buffer)? {
-    //         // if it returs more then 1 byte
-    //         n if n != 0=> {
-    //            // client.write("hello world".as_bytes())?;
-    //             // print!("{}", &buffer[0..n]);
-    //             println!("{n} {}", &buffer);
-    //             // print!("");
-    //         }
-    //         _ => {}
-    //     }
-    // }
 
     Ok(())
 }
