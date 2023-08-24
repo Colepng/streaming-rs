@@ -7,7 +7,7 @@ fn main() -> std::io::Result<()> {
     // Get a output stream handle to the default physical sound device
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let song = buffer("output_no_meta.mp3")?;
+    let song = buffer("6e56CkYWD3JO6ovFZBA8po")?;
 
     let sink = Sink::try_new(&stream_handle).unwrap();
 
