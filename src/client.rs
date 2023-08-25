@@ -1,6 +1,5 @@
 use std::io::{Cursor, Read, Write};
 use std::net::TcpStream;
-use std::rc::Rc;
 
 use rodio::{Decoder, OutputStream, Sink};
 use rspotify::model::{SearchResult, FullTrack};
@@ -14,7 +13,7 @@ fn main() -> std::io::Result<()> {
     
     let sink = Sink::try_new(&stream_handle).unwrap();
 
-    let sink = Rc::new(sink);
+    let sink = sink;
 
     let stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
@@ -57,24 +56,14 @@ fn main() -> std::io::Result<()> {
                 // if i use an rc I might be able to mutate the underlying data for partial loading
                 let song = buffer(&song_id)?;
 
-                let source = Decoder::new_mp3(Cursor::new(song.clone())).unwrap();
+                let source = Decoder::new(Cursor::new(song.clone())).unwrap();
 
-                sink.play();
                 sink.append(source);
-                println!("{}", sink.len());
             }
             "skip" => {
                 input.clear();
  
-                println!("sorry broken");
-                // if sink.len() > 1 {
-                //     println!("{}", sink.len());
-                //     sink.skip_one();
-                //     println!("{}", sink.len());
-                //     sink.pause();
-                // } else {
-                //     //sink.clear();
-                // }
+                sink.skip_one();
             }
             "temp" => {
                 input.clear();
