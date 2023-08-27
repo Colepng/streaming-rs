@@ -105,9 +105,14 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 let songs = client.get_songs();
+                let current_pos = client.pos();
 
                 for (index, song) in songs.into_iter().enumerate() {
-                    println!("{} {} by {}", index, song.name, song.artist);
+                    if index != current_pos {
+                        println!("{} {} by {}", index, song.name, song.artist);
+                    } else {
+                        println!("{} {} by {} *", index, song.name, song.artist);
+                    }
                 }
             }
             "remove" => {

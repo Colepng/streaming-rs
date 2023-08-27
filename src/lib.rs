@@ -141,4 +141,8 @@ impl Client {
         let playlist = self.playlist.lock().unwrap();
         playlist.current_song()
     }
+    pub fn pos(&self) -> usize {
+        let playlist = self.playlist.lock().unwrap();
+        playlist.get_pos()
+    }
 }

@@ -32,7 +32,7 @@ impl Playlist {
         self.pos += offset;
         println!("pos: {}", self.pos);
         sink.append(
-            Decoder::new(Cursor::new(
+            Decoder::new_mp3(Cursor::new(
                 // if i use an rc I might be able to mutate the underlying data for partial loading
                 buffer(&self.songs.get(self.pos as usize).expect("invaild postion").id)
                     .expect("buffering failed"),
@@ -70,5 +70,8 @@ impl Playlist {
         } else {
             None
         }
+    }
+    pub fn get_pos(&self) -> usize {
+        self.pos as usize
     }
 }
