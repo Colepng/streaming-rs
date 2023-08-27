@@ -1,25 +1,20 @@
-use std::io::{Cursor, Write};
+use std::{io::Write, usize};
 
-use rodio::{Decoder, OutputStream, Sink};
-
-mod playlist;
-
-use streaming::{buffer, search};
+use rodio::OutputStream;
+use streaming::{search, Client};
 
 fn main() -> std::io::Result<()> {
-    // Get a output stream handle to the default physical sound device
-    // Arc<Sink>
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    
-    let sink = Sink::try_new(&stream_handle).unwrap();
-
-    let sink = sink;
-
     let stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
 
-    let mut input = String::new();
+    // Get a output stream handle to the default physical sound device
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
+    let mut client = Client::new(stream_handle);
+
+    client.init();
+
+    let mut input = String::new();
     loop {
         print!("cmd: ");
         stdout.flush()?;
@@ -51,37 +46,41 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 // maybe serlize FullTrack and pased that throught instead of the id
-                let song_id = &result[song_number].id.to_owned().unwrap().to_string();
-                // if i use an rc I might be able to mutate the underlying data for partial loading
-                let song = buffer(&song_id)?;
-
-                let source = Decoder::new(Cursor::new(song.clone())).unwrap();
-
-                sink.append(source);
+                client.add_to_queue(&result[song_number]);
             }
             "skip" => {
                 input.clear();
- 
-                sink.skip_one();
+
+                client.skip();
             }
-            "temp" => {
+            "prev" => {
                 input.clear();
 
-                println!("{}", sink.len());
+                client.prev();
+            }
+            "len" => {
+                input.clear();
+
+                println!("{}", client.len());
             }
             "status" => {
                 input.clear();
-                println!("is paused {}", sink.is_paused());
+                println!("is paused {}", client.is_paused());
             }
             "pause" => {
                 input.clear();
 
-                sink.pause();
+                client.pause();
             }
             "play" => {
                 input.clear();
 
-                sink.play();
+                client.play();
+            }
+            "toggle" => {
+                input.clear();
+
+                client.toggle();
             }
             "set volume" => {
                 input.clear();
@@ -94,12 +93,35 @@ fn main() -> std::io::Result<()> {
                 let volume = input.trim().parse::<f32>().unwrap();
                 input.clear();
 
-                sink.set_volume(volume);
+                client.set_volume(volume);
             }
             "get volume" => {
                 input.clear();
 
-                println!("volume: {:.2}", sink.volume());
+                println!("volume: {:.2}", client.get_volume());
+            }
+            "list" => {
+                // add indicator to show what song is playing in the playlist
+                input.clear();
+
+                let songs = client.get_songs();
+
+                for (index, song) in songs.into_iter().enumerate() {
+                    println!("{} {} by {}", index, song.name, song.artist);
+                }
+            }
+            "remove" => {
+                input.clear();
+
+                print!("song number: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+                
+                let song_to_removed = input.trim().parse::<usize>().unwrap();
+                input.clear();
+
+                client.remove_from_queue(song_to_removed);
             }
             _ => {
                 input.clear();
