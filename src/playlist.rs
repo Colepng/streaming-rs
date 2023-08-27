@@ -26,6 +26,8 @@ impl Playlist {
         if self.pos == pos as isize {
             sink.clear();
             sink.play();
+        } else if self.pos > pos as isize {
+            self.pos -= 1;
         }
     }
     pub fn play(&mut self, sink: &mut Sink, offset: isize) {
