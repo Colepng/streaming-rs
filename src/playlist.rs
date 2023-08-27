@@ -21,8 +21,12 @@ impl Playlist {
     pub fn add_to_queue(&mut self, song: &FullTrack) {
         self.songs.push(Song::new(song));
     }
-    pub fn remove_from_queue(&mut self, pos: usize) {
+    pub fn remove_from_queue(&mut self, pos: usize, sink: &mut Sink) {
         self.songs.remove(pos);
+        if self.pos == pos as isize {
+            sink.clear();
+            sink.play();
+        }
     }
     pub fn play(&mut self, sink: &mut Sink, offset: isize) {
         self.pos += offset;

@@ -83,7 +83,8 @@ impl Client {
     }
     pub fn remove_from_queue(&mut self, pos: usize) {
         let mut playlist = self.playlist.lock().unwrap();
-        playlist.remove_from_queue(pos);
+        let mut sink = self.sink.lock().unwrap();
+        playlist.remove_from_queue(pos, &mut sink);
     }
     pub fn play_next(&mut self) {
         let mut playlist = self.playlist.lock().unwrap();
