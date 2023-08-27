@@ -60,4 +60,11 @@ impl Playlist {
     pub fn get_songs(&self) -> Vec<Song> {
         self.songs.clone()
     }
+    pub fn current_song(&self) -> Option<Song> {
+        if self.songs.len() != 0 { 
+            Some(self.songs[self.pos as usize].clone())
+        } else {
+            None
+        }
+    }
 }

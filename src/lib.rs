@@ -136,4 +136,8 @@ impl Client {
         let playlist = self.playlist.lock().unwrap();
         playlist.get_songs()
     }
+    pub fn current_song(&self) -> Option<Song> {
+        let playlist = self.playlist.lock().unwrap();
+        playlist.current_song()
+    }
 }

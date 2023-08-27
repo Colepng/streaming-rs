@@ -123,6 +123,16 @@ fn main() -> std::io::Result<()> {
 
                 client.remove_from_queue(song_to_removed);
             }
+            "current song" => {
+                input.clear();
+                
+                if let Some(song) = client.current_song() {
+                    println!("{} by {}", song.name, song.artist);
+                } else {
+                    println!("no song currently playing");
+                }
+                
+            }
             _ => {
                 input.clear();
                 println!("command not found");
