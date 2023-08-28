@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Cursor};
+use std::io::{BufReader, Cursor, Write, Read};
 
 use rodio::{Decoder, Sink};
 
@@ -85,5 +85,21 @@ impl Playlist {
     }
     pub fn get_pos(&self) -> usize {
         self.pos as usize
+    }
+    pub fn save(&self, name: &str) {
+        let bytes = bitcode::serialize(&self.songs).unwrap();
+
+        let mut file = File::create(format!("Playlist/{name}")).unwrap();
+        file.write(&bytes).unwrap();
+    }
+    pub fn load(name: &str) -> Self {
+        let mut file = File::open(format!("Playlist/{name}")).unwrap();
+        let mut bytes = Vec::new();
+        
+        file.read_to_end(&mut bytes).unwrap();
+
+        let songs = bitcode::deserialize(&bytes).unwrap();
+        
+        Self { pos: -1, songs }
     }
 }

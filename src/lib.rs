@@ -15,6 +15,7 @@ use song::Song;
 use sqlx::SqlitePool;
 
 mod database;
+// somehow hide all but save and new
 pub mod playlist;
 pub mod song;
 
@@ -194,6 +195,18 @@ impl Client {
         } else {
             Err(DownloadError::SongAlreadyDownloaded)
         }
+    }
+    pub fn save_current_playlist(&self, name: &str) {
+        let playlist = self.playlist.lock().unwrap();
+
+        playlist.save(name);
+    }
+    pub fn load_playlist(&mut self, name: &str) {
+        let mut playlist = self.playlist.lock().unwrap();
+        let sink = self.sink.lock().unwrap();
+        *playlist = Playlist::load(name);
+        sink.clear();
+        sink.play();
     }
 }
 

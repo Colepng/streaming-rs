@@ -1,7 +1,7 @@
 use std::{io::Write, usize};
 
 use rodio::OutputStream;
-use streaming::{search, Client};
+use streaming::{search, Client, playlist::Playlist};
 
 fn main() -> std::io::Result<()> {
     let stdin = std::io::stdin();
@@ -231,6 +231,64 @@ fn main() -> std::io::Result<()> {
 
                 // maybe serlize FullTrack and pased that throught instead of the id
                 client.download(&songs[song_number]);
+            }
+            "save current playlist" => {
+                input.clear();
+
+                print!("name: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+
+                client.save_current_playlist(&input.trim());
+                input.clear();
+            }
+            "load" => {
+                input.clear();
+
+                print!("name: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+
+                client.load_playlist(&input.trim());
+                input.clear();
+            }
+            "make playlist" => {
+                input.clear();
+                println!("enter done when finshed entering songs");
+                let mut playlist = Playlist::new();
+
+                loop {
+                    print!("name: ");
+                    stdout.flush()?;
+
+                    stdin.read_line(&mut input)?;
+                    if input.trim() == "done" {
+                        input.clear();
+                        break;
+                    }
+                    let search_results = client.search_local(input.trim());
+                    input.clear();
+                    for (index, song) in search_results.iter().enumerate() {
+                        println!("{} {} by {}", index, song.name, song.artist);
+                    }
+
+                    print!("song_number: ");
+                    stdout.flush()?;
+
+                    stdin.read_line(&mut input)?;
+                    let song_number: usize = input.trim().parse::<usize>().unwrap();
+                    input.clear();
+
+                    playlist.add_to_queue(search_results[song_number].clone());
+                }
+                print!("playlist name: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+                playlist.save(&input);
+                input.clear();
             }
             _ => {
                 input.clear();
