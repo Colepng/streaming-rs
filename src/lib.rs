@@ -3,6 +3,7 @@ use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use database::{add_song, remove_song, search_song};
 use playlist::Playlist;
 use rodio::{OutputStreamHandle, Sink};
 use rspotify::model::{FullTrack, SearchResult};
@@ -10,6 +11,9 @@ use rspotify::prelude::BaseClient;
 use rspotify::{ClientCredsSpotify, Credentials};
 use song::Song;
 
+use sqlx::SqlitePool;
+
+mod database;
 pub mod playlist;
 pub mod song;
 
@@ -28,7 +32,7 @@ pub fn buffer(song: &str) -> std::io::Result<Vec<u8>> {
 }
 
 // fn search(input: &str) -> Vec<(String, Option<TrackId<'static>>)>{
-pub fn search(input: &str) -> Vec<FullTrack> {
+pub fn search(input: &str) -> Vec<Song> {
     let creds = Credentials::from_env().unwrap();
     let spotify = ClientCredsSpotify::new(creds);
     spotify.request_token().unwrap();
@@ -52,11 +56,15 @@ pub fn search(input: &str) -> Vec<FullTrack> {
     }
 
     names
+        .into_iter()
+        .map(|x| Song::new(&x))
+        .collect::<Vec<Song>>()
 }
 
 pub struct Client {
     playlist: Arc<Mutex<Playlist>>,
     sink: Arc<Mutex<Sink>>,
+    db: SqlitePool,
 }
 
 impl Client {
@@ -64,6 +72,7 @@ impl Client {
         Client {
             playlist: Arc::new(Mutex::new(Playlist::new())),
             sink: Arc::new(Mutex::new(Sink::try_new(&stream_handle).unwrap())),
+            db: database::db(),
         }
     }
     pub fn init(&mut self) {
@@ -77,7 +86,7 @@ impl Client {
             }
         });
     }
-    pub fn add_to_queue(&mut self, song: &FullTrack) {
+    pub fn add_to_queue(&mut self, song: Song) {
         let mut playlist = self.playlist.lock().unwrap();
         playlist.add_to_queue(song);
     }
@@ -121,6 +130,11 @@ impl Client {
         let mut sink = self.sink.lock().unwrap();
         playlist.prev(&mut *sink);
     }
+    pub fn clear(&mut self) {
+        let sink = self.sink.lock().unwrap();
+        sink.clear();
+        sink.play();
+    }
     pub fn get_volume(&self) -> f32 {
         let sink = self.sink.lock().unwrap();
         sink.volume()
@@ -144,5 +158,14 @@ impl Client {
     pub fn pos(&self) -> usize {
         let playlist = self.playlist.lock().unwrap();
         playlist.get_pos()
+    }
+    pub fn add_song(&mut self, song: &Song) {
+        add_song(song, &self.db);
+    }
+    pub fn remove_song(&mut self, song: &Song) {
+        remove_song(song, &self.db);
+    }
+    pub fn search_local(&mut self, search: &str) -> Vec<Song> {
+        search_song(search, &self.db)
     }
 }

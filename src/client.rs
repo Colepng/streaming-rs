@@ -34,7 +34,7 @@ fn main() -> std::io::Result<()> {
                 // TODO improve
                 for (index, track) in result.iter().enumerate() {
                     let name = &track.name;
-                    let artist = &track.artists[0].name;
+                    let artist = &track.artist;
                     println!("{index} {name} by {artist} ");
                 }
 
@@ -46,7 +46,31 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 // maybe serlize FullTrack and pased that throught instead of the id
-                client.add_to_queue(&result[song_number]);
+                client.add_to_queue(result[song_number].clone());
+            }
+            "search song" => {
+                input.clear();
+
+                print!("search: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+
+                let songs = client.search_local(input.trim());
+                input.clear();
+
+                for (index, song) in songs.iter().enumerate() {
+                    println!("{} {} by {}", index, song.name, song.artist);
+                }
+
+                print!("song_number: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+                let song_number: usize = input.trim().parse::<usize>().unwrap();
+                input.clear();
+
+                client.add_to_queue(songs[song_number].clone());
             }
             "skip" => {
                 input.clear();
@@ -57,6 +81,9 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 client.prev();
+            }
+            "clear" => {
+                client.clear();
             }
             "len" => {
                 input.clear();
@@ -122,7 +149,7 @@ fn main() -> std::io::Result<()> {
                 stdout.flush()?;
 
                 stdin.read_line(&mut input)?;
-                
+
                 let song_to_removed = input.trim().parse::<usize>().unwrap();
                 input.clear();
 
@@ -130,13 +157,55 @@ fn main() -> std::io::Result<()> {
             }
             "current song" => {
                 input.clear();
-                
+
                 if let Some(song) = client.current_song() {
                     println!("{} by {}", song.name, song.artist);
                 } else {
                     println!("no song currently playing");
                 }
-                
+            }
+            "add current song" => {
+                input.clear();
+
+                if let Some(song) = client.current_song() {
+                    client.add_song(&song);
+                    println!("{} by {}", song.name, song.artist);
+                } else {
+                    println!("no song currently playing");
+                }
+            }
+            "remove song" => {
+                input.clear();
+
+                print!("search: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+
+                let songs = client.search_local(input.trim());
+                input.clear();
+
+                for (index, song) in songs.iter().enumerate() {
+                    println!("{} {} by {}", index, song.name, song.artist);
+                }
+
+                print!("song_number: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+                let song_number: usize = input.trim().parse::<usize>().unwrap();
+                input.clear();
+
+                client.remove_song(&songs[song_number]);
+            }
+            "list songs" => {
+                input.clear();
+
+                let songs = client.search_local("");
+
+                for (index, song) in songs.iter().enumerate() {
+                    println!("{} {} by {}", index, song.name, song.artist);
+                }
             }
             _ => {
                 input.clear();

@@ -1,8 +1,9 @@
 use rspotify::model::FullTrack;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Song {
-    track: FullTrack,
+    // track: FullTrack,
     pub id: String,
     pub name: String,
     pub artist: String,
@@ -12,7 +13,7 @@ pub struct Song {
 impl Song {
     pub fn new(song: &FullTrack) -> Self {
         Self {
-            track: song.clone(),
+            // track: song.clone(),
             id: song.id.as_ref().unwrap().to_string(),
             name: song.name.to_owned(),
             artist: song.artists[0].name.to_owned(),
