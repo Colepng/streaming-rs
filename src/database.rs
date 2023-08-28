@@ -1,14 +1,12 @@
-use smol;
 use sqlx::SqlitePool;
 
 use crate::song::Song;
 
-pub fn db() -> SqlitePool {
-    smol::block_on(async { SqlitePool::connect("sqlite:library.db").await.unwrap() })
+pub async fn db() -> SqlitePool {
+    SqlitePool::connect("sqlite:library.db").await.unwrap()
 }
 
-pub fn add_song(song: &Song, pool: &SqlitePool) {
-    smol::block_on(async {
+pub async fn add_song(song: &Song, pool: &SqlitePool) {
         let mut conn = pool.acquire().await.unwrap();
 
         let serialized = bitcode::serialize(song).unwrap();
@@ -24,33 +22,29 @@ pub fn add_song(song: &Song, pool: &SqlitePool) {
         )
         .execute(&mut *conn)
         .await
-        .unwrap()
-    });
+        .unwrap();
 }
 
-pub fn search_song(search: &str, pool: &SqlitePool) -> Vec<Song> {
-    smol::block_on(async {
-        let mut conn = pool.acquire().await.unwrap();
+pub async fn search_song(search: &str, pool: &SqlitePool) -> Vec<Song> {
+    let mut conn = pool.acquire().await.unwrap();
 
-        let search = format!("%{}%", search);
-        let results = sqlx::query!(
-            "SELECT song_binary FROM library
-            WHERE name LIKE $1 or album LIKE $1 or artist LIKE $1",
-            search
+    let search = format!("%{}%", search);
+    let results = sqlx::query!(
+        "SELECT song_binary FROM library
+        WHERE name LIKE $1 or album LIKE $1 or artist LIKE $1",
+        search
         )
         .fetch_all(&mut *conn)
         .await
         .unwrap();
 
-        results
-            .iter()
-            .map(|x| bitcode::deserialize(&x.song_binary).unwrap())
-            .collect::<Vec<Song>>()
-    })
+    results
+        .iter()
+        .map(|x| bitcode::deserialize(&x.song_binary).unwrap())
+        .collect::<Vec<Song>>()
 }
 
-pub fn remove_song(song: &Song, pool: &SqlitePool) {
-    smol::block_on(async {
+pub async fn remove_song(song: &Song, pool: &SqlitePool) {
         let mut conn = pool.acquire().await.unwrap();
 
         sqlx::query!(
@@ -61,11 +55,9 @@ pub fn remove_song(song: &Song, pool: &SqlitePool) {
         .execute(&mut *conn)
         .await
         .unwrap();
-    })
 }
 
-pub fn song_added(song: &Song, pool: &SqlitePool) -> bool {
-    smol::block_on(async {
+pub async fn song_added(song: &Song, pool: &SqlitePool) -> bool {
         let mut conn = pool.acquire().await.unwrap();
 
         let temp = sqlx::query!(
@@ -76,5 +68,4 @@ pub fn song_added(song: &Song, pool: &SqlitePool) -> bool {
             ).fetch_all(&mut *conn).await.unwrap();
 
         temp[0].id == 1
-    })
 }

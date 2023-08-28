@@ -2,15 +2,20 @@ use std::{io::Write, usize};
 
 use rodio::OutputStream;
 use streaming::{search, Client, playlist::Playlist};
+use futures::executor::block_on;
 
 fn main() -> std::io::Result<()> {
+    block_on(main_async())
+}
+
+async fn main_async() -> std::io::Result<()> {
     let stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
 
     // Get a output stream handle to the default physical sound device
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let mut client = Client::new(stream_handle);
+    let mut client = Client::new(stream_handle).await;
 
     client.init();
 
@@ -28,7 +33,7 @@ fn main() -> std::io::Result<()> {
                 stdout.flush()?;
 
                 stdin.read_line(&mut input)?;
-                let result = search(input.trim());
+                let result = search(input.trim()).await;
                 input.clear();
 
                 // TODO improve
@@ -56,7 +61,7 @@ fn main() -> std::io::Result<()> {
 
                 stdin.read_line(&mut input)?;
 
-                let songs = client.search_local(input.trim());
+                let songs = client.search_local(input.trim()).await;
                 input.clear();
 
                 for (index, song) in songs.iter().enumerate() {
@@ -168,7 +173,7 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 if let Some(song) = client.current_song() {
-                    client.add_song(&song);
+                    client.add_song(&song).await;
                     println!("{} by {}", song.name, song.artist);
                 } else {
                     println!("no song currently playing");
@@ -182,7 +187,7 @@ fn main() -> std::io::Result<()> {
 
                 stdin.read_line(&mut input)?;
 
-                let songs = client.search_local(input.trim());
+                let songs = client.search_local(input.trim()).await;
                 input.clear();
 
                 for (index, song) in songs.iter().enumerate() {
@@ -196,12 +201,12 @@ fn main() -> std::io::Result<()> {
                 let song_number: usize = input.trim().parse::<usize>().unwrap();
                 input.clear();
 
-                client.remove_song(&songs[song_number]);
+                client.remove_song(&songs[song_number]).await;
             }
             "list songs" => {
                 input.clear();
 
-                let songs = client.search_local("");
+                let songs = client.search_local("").await;
 
                 for (index, song) in songs.iter().enumerate() {
                     println!("{} {} by {}", index, song.name, song.artist);
@@ -215,7 +220,7 @@ fn main() -> std::io::Result<()> {
 
                 stdin.read_line(&mut input)?;
 
-                let songs = client.search_local(input.trim());
+                let songs = client.search_local(input.trim()).await;
                 input.clear();
 
                 for (index, song) in songs.iter().enumerate() {
@@ -230,7 +235,7 @@ fn main() -> std::io::Result<()> {
                 input.clear();
 
                 // maybe serlize FullTrack and pased that throught instead of the id
-                client.download(&songs[song_number]);
+                client.download(&songs[song_number]).await;
             }
             "save current playlist" => {
                 input.clear();
@@ -268,7 +273,7 @@ fn main() -> std::io::Result<()> {
                         input.clear();
                         break;
                     }
-                    let search_results = client.search_local(input.trim());
+                    let search_results = client.search_local(input.trim()).await;
                     input.clear();
                     for (index, song) in search_results.iter().enumerate() {
                         println!("{} {} by {}", index, song.name, song.artist);

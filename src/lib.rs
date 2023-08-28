@@ -33,7 +33,7 @@ pub fn buffer(song: &Song) -> std::io::Result<Vec<u8>> {
 }
 
 // fn search(input: &str) -> Vec<(String, Option<TrackId<'static>>)>{
-pub fn search(input: &str) -> Vec<Song> {
+pub async fn search(input: &str) -> Vec<Song> {
     let creds = Credentials::from_env().unwrap();
     let spotify = ClientCredsSpotify::new(creds);
     spotify.request_token().unwrap();
@@ -75,11 +75,11 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(stream_handle: OutputStreamHandle) -> Self {
+    pub async fn new(stream_handle: OutputStreamHandle) -> Self {
         Client {
             playlist: Arc::new(Mutex::new(Playlist::new())),
             sink: Arc::new(Mutex::new(Sink::try_new(&stream_handle).unwrap())),
-            db: database::db(),
+            db: database::db().await,
         }
     }
     pub fn init(&mut self) {
@@ -166,17 +166,17 @@ impl Client {
         let playlist = self.playlist.lock().unwrap();
         playlist.get_pos()
     }
-    pub fn add_song(&mut self, song: &Song) {
-        add_song(song, &self.db);
+    pub async fn add_song(&mut self, song: &Song) {
+        add_song(song, &self.db).await;
     }
-    pub fn remove_song(&mut self, song: &Song) {
-        remove_song(song, &self.db);
+    pub async fn remove_song(&mut self, song: &Song) {
+        remove_song(song, &self.db).await;
     }
-    pub fn search_local(&mut self, search: &str) -> Vec<Song> {
-        search_song(search, &self.db)
+    pub async fn search_local(&mut self, search: &str) -> Vec<Song> {
+        search_song(search, &self.db).await
     }
-    pub fn download(&self, song: &Song) -> Result<(), DownloadError> {
-        if !song_added(song, &self.db) {
+    pub async fn download(&self, song: &Song) -> Result<(), DownloadError> {
+        if !song_added(song, &self.db).await {
             Err(DownloadError::SongNotInLibrary)
         } else if !song.is_downloaded() {
             match buffer(song) {

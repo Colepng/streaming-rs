@@ -9,11 +9,11 @@ default-run = "server"
 [dependencies]
 bitcode = { version = "0.4.0", features = [ "serde" ] }
 crossterm = "0.27.0"
+futures = "0.3.28"
 ratatui = { version = "0.23.0", features = ["all-widgets"] }
 rodio = { git = "https://github.com/RustAudio/rodio.git" }
 rspotify = { version = "0.11.7", features = ["env-file", "client-ureq", "ureq-rustls-tls"], default-features = false }
 serde = "1.0.188"
-smol = "1.3.0"
 sqlx = { version = "0.7.1", features = [ "runtime-async-std", "tls-rustls", "sqlite" ] }
 
 [lib]

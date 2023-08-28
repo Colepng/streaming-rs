@@ -4,3 +4,7 @@
 Music/
 
 Library/
+
+library.db-wal
+
+library.db-shm
