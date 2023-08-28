@@ -1,7 +1,7 @@
-use std::io::Cursor;
+use std::fs::File;
+use std::io::{BufReader, Cursor};
 
 use rodio::{Decoder, Sink};
-use rspotify::model::FullTrack;
 
 use crate::buffer;
 use crate::song::Song;
@@ -33,20 +33,24 @@ impl Playlist {
     pub fn play(&mut self, sink: &mut Sink, offset: isize) {
         self.pos += offset;
         println!("pos: {}", self.pos);
-        sink.append(
-            Decoder::new_mp3(Cursor::new(
-                // if i use an rc I might be able to mutate the underlying data for partial loading
-                buffer(
-                    &self
-                        .songs
-                        .get(self.pos as usize)
-                        .expect("invaild postion")
-                        .id,
+        let song = &self.songs.get(self.pos as usize).expect("invaild postion");
+        if song.is_downloaded() {
+            sink.append(
+                Decoder::new_mp3(
+                    BufReader::new(File::open(song.path()).unwrap()),
                 )
-                .expect("buffering failed"),
-            ))
-            .unwrap(),
-        );
+                .unwrap(),
+            );
+        } else {
+            let temp = buffer(song).unwrap();
+            sink.append(
+                Decoder::new_mp3(
+                    // if i use an rc I might be able to mutate the underlying data for partial loading
+                    Cursor::new(temp),
+                )
+                .unwrap(),
+            );
+        };
     }
     pub fn play_next(&mut self, sink: &mut Sink) {
         self.play(sink, 1);

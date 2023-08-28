@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use rspotify::model::FullTrack;
 use serde::{Deserialize, Serialize};
 
@@ -19,5 +21,15 @@ impl Song {
             artist: song.artists[0].name.to_owned(),
             album: song.album.name.to_owned(),
         }
+    }
+    pub fn is_downloaded(&self) -> bool {
+        // path subject to change
+        Path::new(format!("Library/{}/{}/{}.mp3", self.artist, self.album, self.name).as_str()).exists()
+    }
+    pub fn path(&self) -> PathBuf {
+        PathBuf::from(format!("Library/{}/{}/{}.mp3", self.artist, self.album, self.name))
+    }
+    pub fn dir(&self) -> PathBuf {
+        PathBuf::from(format!("Library/{}/{}/", self.artist, self.album))
     }
 }

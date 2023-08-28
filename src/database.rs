@@ -63,3 +63,18 @@ pub fn remove_song(song: &Song, pool: &SqlitePool) {
         .unwrap();
     })
 }
+
+pub fn song_added(song: &Song, pool: &SqlitePool) -> bool {
+    smol::block_on(async {
+        let mut conn = pool.acquire().await.unwrap();
+
+        let temp = sqlx::query!(
+            "SELECT COUNT(id) as id
+            FROM library
+            WHERE id=$1",
+            song.id,
+            ).fetch_all(&mut *conn).await.unwrap();
+
+        temp[0].id == 1
+    })
+}

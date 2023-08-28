@@ -207,6 +207,31 @@ fn main() -> std::io::Result<()> {
                     println!("{} {} by {}", index, song.name, song.artist);
                 }
             }
+            "download local song" => {
+                input.clear();
+
+                print!("search: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+
+                let songs = client.search_local(input.trim());
+                input.clear();
+
+                for (index, song) in songs.iter().enumerate() {
+                    println!("{} {} by {}", index, song.name, song.artist);
+                }
+
+                print!("song_number: ");
+                stdout.flush()?;
+
+                stdin.read_line(&mut input)?;
+                let song_number: usize = input.trim().parse::<usize>().unwrap();
+                input.clear();
+
+                // maybe serlize FullTrack and pased that throught instead of the id
+                client.download(&songs[song_number]);
+            }
             _ => {
                 input.clear();
                 println!("command not found");

@@ -1,9 +1,10 @@
+use std::fs::{File, DirBuilder};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use database::{add_song, remove_song, search_song};
+use database::{add_song, remove_song, search_song, song_added};
 use playlist::Playlist;
 use rodio::{OutputStreamHandle, Sink};
 use rspotify::model::{FullTrack, SearchResult};
@@ -17,11 +18,10 @@ mod database;
 pub mod playlist;
 pub mod song;
 
-pub fn buffer(song: &str) -> std::io::Result<Vec<u8>> {
+pub fn buffer(song: &Song) -> std::io::Result<Vec<u8>> {
     let mut stream = TcpStream::connect("127.0.0.1:6969")?;
 
-    println!("id: {song}");
-    stream.write(song.as_bytes())?;
+    stream.write(song.id.as_bytes())?;
 
     let mut buffer: Vec<u8> = Vec::new();
 
@@ -59,6 +59,12 @@ pub fn search(input: &str) -> Vec<Song> {
         .into_iter()
         .map(|x| Song::new(&x))
         .collect::<Vec<Song>>()
+}
+
+pub enum DownloadError {
+    SongAlreadyDownloaded,
+    SongNotInLibrary,
+    DownloadingError,
 }
 
 pub struct Client {
@@ -168,4 +174,31 @@ impl Client {
     pub fn search_local(&mut self, search: &str) -> Vec<Song> {
         search_song(search, &self.db)
     }
+    pub fn download(&self, song: &Song) -> Result<(), DownloadError> {
+        if !song_added(song, &self.db) {
+            Err(DownloadError::SongNotInLibrary)
+        } else if !song.is_downloaded() {
+            match buffer(song) {
+                Ok(bytes) => {
+                    DirBuilder::new()
+                        .recursive(true)
+                        .create(song.dir()).unwrap();
+                    let mut file = File::create(song.path()).unwrap();
+                    file.write(&bytes).unwrap();
+                    Ok(())
+                }
+                _ => {
+                    Err(DownloadError::DownloadingError)
+                }
+            }
+        } else {
+            Err(DownloadError::SongAlreadyDownloaded)
+        }
+    }
 }
+
+// bug tracker
+// adding song alrady added
+// 100% cpu
+// optomizartons
+// storing if a song is downlaod in db to cut down and io calls
