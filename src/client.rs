@@ -33,7 +33,7 @@ async fn main_async() -> std::io::Result<()> {
                 stdout.flush()?;
 
                 stdin.read_line(&mut input)?;
-                let result = search(input.trim()).await;
+                let result = search(input.trim().to_owned()).await;
                 input.clear();
 
                 // TODO improve
@@ -51,7 +51,7 @@ async fn main_async() -> std::io::Result<()> {
                 input.clear();
 
                 // maybe serlize FullTrack and pased that throught instead of the id
-                client.add_to_queue(result[song_number].clone());
+                client.add_to_queue(&result[song_number]);
             }
             "search song" => {
                 input.clear();
@@ -75,7 +75,7 @@ async fn main_async() -> std::io::Result<()> {
                 let song_number: usize = input.trim().parse::<usize>().unwrap();
                 input.clear();
 
-                client.add_to_queue(songs[song_number].clone());
+                client.add_to_queue(&songs[song_number]);
             }
             "skip" => {
                 input.clear();
@@ -286,7 +286,7 @@ async fn main_async() -> std::io::Result<()> {
                     let song_number: usize = input.trim().parse::<usize>().unwrap();
                     input.clear();
 
-                    playlist.add_to_queue(search_results[song_number].clone());
+                    playlist.add_to_queue(&search_results[song_number]);
                 }
                 print!("playlist name: ");
                 stdout.flush()?;

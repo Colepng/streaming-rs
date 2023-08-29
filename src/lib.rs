@@ -33,7 +33,7 @@ pub fn buffer(song: &Song) -> std::io::Result<Vec<u8>> {
 }
 
 // fn search(input: &str) -> Vec<(String, Option<TrackId<'static>>)>{
-pub async fn search(input: &str) -> Vec<Song> {
+pub async fn search(input: String) -> Vec<Song> {
     let creds = Credentials::from_env().unwrap();
     let spotify = ClientCredsSpotify::new(creds);
     spotify.request_token().unwrap();
@@ -41,7 +41,7 @@ pub async fn search(input: &str) -> Vec<Song> {
     let mut names: Vec<FullTrack> = Vec::new();
     let search_resault = spotify
         .search(
-            input,
+            input.as_str(),
             rspotify::model::SearchType::Track,
             None,
             None,
@@ -93,7 +93,7 @@ impl Client {
             }
         });
     }
-    pub fn add_to_queue(&mut self, song: Song) {
+    pub fn add_to_queue(&mut self, song: &Song) {
         let mut playlist = self.playlist.lock().unwrap();
         playlist.add_to_queue(song);
     }

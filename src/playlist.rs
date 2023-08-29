@@ -18,8 +18,8 @@ impl Playlist {
             songs: Vec::new(),
         }
     }
-    pub fn add_to_queue(&mut self, song: Song) {
-        self.songs.push(song);
+    pub fn add_to_queue(&mut self, song: &Song) {
+        self.songs.push(song.clone());
     }
     pub fn remove_from_queue(&mut self, pos: usize, sink: &mut Sink) {
         self.songs.remove(pos);
