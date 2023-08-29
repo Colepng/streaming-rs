@@ -1,19 +1,22 @@
 use std::time::Duration;
 
 use app::App;
-use ratatui::{prelude::CrosstermBackend, Terminal};
-use crossterm::{event::{self, EnableMouseCapture, DisableMouseCapture, Event, KeyEventKind}, terminal::{disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}, execute}; 
-use crossterm::terminal::enable_raw_mode;
 use crossterm::event::KeyCode;
+use crossterm::terminal::enable_raw_mode;
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind},
+    execute,
+    terminal::{disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use ratatui::{prelude::CrosstermBackend, Terminal};
 use rodio::OutputStream;
 use streaming::Client;
 
+mod app;
 mod render;
 mod stateful_list;
-mod app;
 
 use render::render;
-use tokio::sync::mpsc;
 #[tokio::main]
 async fn main() -> Result<(), Box<std::io::Error>> {
     let mut stdout = std::io::stdout();
@@ -35,7 +38,9 @@ async fn main() -> Result<(), Box<std::io::Error>> {
     let mut search_results = None;
 
     loop {
-        terminal.draw(|frame| { render(frame, &mut app); })?;
+        terminal.draw(|frame| {
+            render(frame, &mut app);
+        })?;
 
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
@@ -57,7 +62,7 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                                     // if !search_bar.is_empty() {
                                     let songs = streaming::search(search_bar.clone()).await;
                                     songs
-                                        // }
+                                    // }
                                 }));
                             }
                         }
@@ -77,10 +82,8 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                         }
                         _ => {}
                     }
-
                 }
             }
-
         }
         if let Some(ref handle) = search_results {
             if handle.is_finished() {
@@ -91,7 +94,11 @@ async fn main() -> Result<(), Box<std::io::Error>> {
     }
 
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
     terminal.show_cursor()?;
 
     Ok(())

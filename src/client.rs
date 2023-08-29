@@ -1,8 +1,8 @@
 use std::{io::Write, usize};
 
-use rodio::OutputStream;
-use streaming::{search, Client, playlist::Playlist};
 use futures::executor::block_on;
+use rodio::OutputStream;
+use streaming::{playlist::Playlist, search, Client};
 
 fn main() -> std::io::Result<()> {
     block_on(main_async())

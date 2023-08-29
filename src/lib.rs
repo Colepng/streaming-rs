@@ -1,4 +1,4 @@
-use std::fs::{File, DirBuilder};
+use std::fs::{DirBuilder, File};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
@@ -183,14 +183,13 @@ impl Client {
                 Ok(bytes) => {
                     DirBuilder::new()
                         .recursive(true)
-                        .create(song.dir()).unwrap();
+                        .create(song.dir())
+                        .unwrap();
                     let mut file = File::create(song.path()).unwrap();
                     file.write(&bytes).unwrap();
                     Ok(())
                 }
-                _ => {
-                    Err(DownloadError::DownloadingError)
-                }
+                _ => Err(DownloadError::DownloadingError),
             }
         } else {
             Err(DownloadError::SongAlreadyDownloaded)

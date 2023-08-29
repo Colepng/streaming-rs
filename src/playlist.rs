@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Cursor, Write, Read};
+use std::io::{BufReader, Cursor, Read, Write};
 
 use rodio::{Decoder, Sink};
 
@@ -36,10 +36,7 @@ impl Playlist {
         let song = &self.songs.get(self.pos as usize).expect("invaild postion");
         if song.is_downloaded() {
             sink.append(
-                Decoder::new_mp3(
-                    BufReader::new(File::open(song.path()).unwrap()),
-                )
-                .unwrap(),
+                Decoder::new_mp3(BufReader::new(File::open(song.path()).unwrap())).unwrap(),
             );
         } else {
             let temp = buffer(song).unwrap();
@@ -95,11 +92,11 @@ impl Playlist {
     pub fn load(name: &str) -> Self {
         let mut file = File::open(format!("Playlist/{name}")).unwrap();
         let mut bytes = Vec::new();
-        
+
         file.read_to_end(&mut bytes).unwrap();
 
         let songs = bitcode::deserialize(&bytes).unwrap();
-        
+
         Self { pos: -1, songs }
     }
 }

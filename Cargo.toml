@@ -32,7 +32,3 @@ path = "src/client.rs"
 [[bin]]
 name = "tui"
 path = "src/tui/tui.rs"
-
-[[bin]]
-name = "temp"
-path = "src/temp.rs"
