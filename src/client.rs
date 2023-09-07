@@ -295,6 +295,11 @@ async fn main_async() -> std::io::Result<()> {
                 playlist.save(&input);
                 input.clear();
             }
+            "shuffle all" => {
+                input.clear();
+
+                client.shuffle_all_songs().await;
+            }
             _ => {
                 input.clear();
                 println!("command not found");

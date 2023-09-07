@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Write};
 
+use rand::seq::SliceRandom;
 use rodio::{Decoder, Sink};
 
 use crate::buffer;
@@ -32,7 +33,6 @@ impl Playlist {
     }
     pub fn play(&mut self, sink: &mut Sink, offset: isize) {
         self.pos += offset;
-        println!("pos: {}", self.pos);
         let song = &self.songs.get(self.pos as usize).expect("invaild postion");
         if song.is_downloaded() {
             sink.append(
@@ -98,5 +98,13 @@ impl Playlist {
         let songs = bitcode::deserialize(&bytes).unwrap();
 
         Self { pos: -1, songs }
+    }
+    pub fn load_songs(&mut self, songs: Vec<Song>) {
+        self.songs = songs;
+        self.pos = -1;
+    }
+    pub fn shuffle(&mut self) {
+        let mut rng = rand::thread_rng();
+        self.songs.shuffle(&mut rng);
     }
 }

@@ -2405,6 +2405,7 @@ dependencies = [
  "bitcode",
  "crossterm",
  "futures",
+ "rand",
  "ratatui",
  "rodio",
  "rspotify",

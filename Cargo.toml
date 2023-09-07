@@ -10,6 +10,7 @@ default-run = "server"
 bitcode = { version = "0.4.0", features = [ "serde" ] }
 crossterm = "0.27.0"
 futures = "0.3.28"
+rand = "0.8.5"
 ratatui = { version = "0.23.0", features = ["all-widgets"] }
 rodio = { git = "https://github.com/RustAudio/rodio.git" }
 rspotify = { version = "0.11.7", features = ["env-file", "client-ureq", "ureq-rustls-tls"], default-features = false }

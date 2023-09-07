@@ -207,6 +207,15 @@ impl Client {
         sink.clear();
         sink.play();
     }
+    pub async fn shuffle_all_songs(&mut self) {
+        let songs = self.search_local("").await;
+        let mut playlist = self.playlist.lock().unwrap();
+        let sink = self.sink.lock().unwrap();
+        playlist.load_songs(songs);
+        playlist.shuffle();
+        sink.clear();
+        sink.play();
+    }
 }
 
 // bug tracker
