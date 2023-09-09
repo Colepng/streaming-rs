@@ -15,6 +15,7 @@ use streaming::Client;
 mod app;
 mod render;
 mod stateful_list;
+mod tab_state;
 
 use render::render;
 #[tokio::main]
@@ -41,7 +42,7 @@ async fn main() -> Result<(), Box<std::io::Error>> {
         terminal.draw(|frame| {
             render(frame, &mut app);
         })?;
-
+        app.queue.items = client.get_songs();
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
@@ -53,6 +54,11 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                                 let songs = streaming::search(search_bar.clone()).await;
                                 songs
                             }));
+                        }
+                        KeyCode::F(n) => {
+                            if n as usize <= app.tabs.titles.len() {
+                                app.tabs.index = n as usize - 1;
+                            }
                         }
                         KeyCode::Backspace => {
                             app.search_bar.pop();
@@ -67,18 +73,21 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                             }
                         }
                         KeyCode::Down => {
-                            app.queue.next();
+                            app.search_results.next();
                         }
                         KeyCode::Up => {
-                            app.queue.previous();
+                            app.search_results.previous();
                         }
                         KeyCode::Enter => {
-                            if let Some(song) = app.queue.get_selected() {
+                            if let Some(song) = app.search_results.get_selected() {
                                 client.add_to_queue(song);
                             }
                         }
                         KeyCode::Esc => {
                             break;
+                        }
+                        KeyCode::Tab => {
+                            app.tabs.next();
                         }
                         _ => {}
                     }
@@ -87,7 +96,7 @@ async fn main() -> Result<(), Box<std::io::Error>> {
         }
         if let Some(ref handle) = search_results {
             if handle.is_finished() {
-                app.queue.items = search_results.unwrap().await.unwrap();
+                app.search_results.items = search_results.unwrap().await.unwrap();
                 search_results = None
             }
         }
