@@ -137,7 +137,7 @@ async fn main_async() -> std::io::Result<()> {
                 input.clear();
 
                 let songs = client.get_songs();
-                let current_pos = client.pos();
+                let current_pos = client.pos().unwrap();
 
                 for (index, song) in songs.into_iter().enumerate() {
                     if index != current_pos {

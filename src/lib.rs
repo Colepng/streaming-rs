@@ -137,6 +137,13 @@ impl Client {
         let mut sink = self.sink.lock().unwrap();
         playlist.prev(&mut *sink);
     }
+    pub fn play_n(&mut self, index: usize) {
+        let mut playlist = self.playlist.lock().unwrap();
+        let mut sink = self.sink.lock().unwrap();
+
+        playlist.play(&mut sink, index);
+        sink.skip_one();
+    }
     pub fn clear(&mut self) {
         let sink = self.sink.lock().unwrap();
         sink.clear();
@@ -162,9 +169,9 @@ impl Client {
         let playlist = self.playlist.lock().unwrap();
         playlist.current_song()
     }
-    pub fn pos(&self) -> usize {
+    pub fn pos(&self) -> Option<usize> {
         let playlist = self.playlist.lock().unwrap();
-        playlist.get_pos()
+        playlist.pos()
     }
     pub async fn add_song(&mut self, song: &Song) {
         add_song(song, &self.db).await;
