@@ -36,8 +36,6 @@ async fn main() -> Result<(), Box<std::io::Error>> {
 
     let mut app = App::new(&mut client).await;
 
-    let mut search_results = None;
-
     loop {
         terminal.draw(|frame| {
             render(frame, &mut app, &mut client);
@@ -47,29 +45,9 @@ async fn main() -> Result<(), Box<std::io::Error>> {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
                     match key.code {
-                        KeyCode::Char(key) => {
-                            app.search_bar.push(key);
-                            let search_bar = app.search_bar.clone();
-                            search_results = Some(tokio::spawn(async move {
-                                let songs = streaming::search(search_bar.clone()).await;
-                                songs
-                            }));
-                        }
                         KeyCode::F(n) => {
                             if n as usize <= app.tabs.titles.len() {
                                 app.tabs.index = n as usize - 1;
-                            }
-                        }
-                        KeyCode::Backspace => {
-                            app.search_bar.pop();
-                            let search_bar = app.search_bar.clone();
-                            if !search_bar.is_empty() {
-                                search_results = Some(tokio::spawn(async move {
-                                    // if !search_bar.is_empty() {
-                                    let songs = streaming::search(search_bar.clone()).await;
-                                    songs
-                                    // }
-                                }));
                             }
                         }
                         KeyCode::Down => {
@@ -87,15 +65,17 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                         KeyCode::Tab => {
                             app.tabs.next();
                         }
-                        _ => {}
+                        key => {
+                            app.handle_tabs_input(&mut client, key);
+                        }
                     }
                 }
             }
         }
-        if let Some(ref handle) = search_results {
+        if let Some(ref handle) = app.search_future {
             if handle.is_finished() {
-                app.search_results.items = search_results.unwrap().await.unwrap();
-                search_results = None
+                app.search_results.items = app.search_future.unwrap().await.unwrap();
+                app.search_future = None;
             }
         }
     }
