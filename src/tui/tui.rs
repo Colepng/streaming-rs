@@ -22,7 +22,7 @@ use render::render;
 async fn main() -> Result<(), Box<std::io::Error>> {
     let mut stdout = std::io::stdout();
     enable_raw_mode()?;
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    execute!(stdout, EnterAlternateScreen)?;
 
     let backend = CrosstermBackend::new(stdout);
 

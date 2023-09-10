@@ -3,6 +3,7 @@ use std::io::{self, Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 
 use database::{add_song, remove_song, search_song, song_added};
 use playlist::Playlist;
@@ -98,6 +99,9 @@ impl Client {
             if playlist.if_play(&*sink) {
                 playlist.play_next(&mut *sink);
             }
+            drop(sink);
+            drop(playlist);
+            thread::sleep(Duration::from_millis(10));
         });
     }
     pub fn add_to_queue(&mut self, song: &Song) {
