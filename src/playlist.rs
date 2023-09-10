@@ -64,8 +64,8 @@ impl Playlist {
         }
     }
     pub fn if_play(&mut self, sink: &Sink) -> bool {
-        if self.pos.is_some() {
-            sink.len() == 0 && self.songs.len() > self.pos.unwrap() + 1
+        if let Some(pos) = self.pos {
+            sink.len() == 0 && self.songs.len() > pos + 1
         } else {
             sink.len() == 0 && self.songs.len() > 0
         }

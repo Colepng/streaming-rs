@@ -1,5 +1,5 @@
-use std::fs::{DirBuilder, File};
-use std::io::{Read, Write};
+use std::fs::{self, DirBuilder, File};
+use std::io::{self, Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -68,6 +68,7 @@ pub enum DownloadError {
     DownloadingError,
 }
 
+#[derive(Clone)]
 pub struct Client {
     playlist: Arc<Mutex<Playlist>>,
     sink: Arc<Mutex<Sink>>,
@@ -202,6 +203,9 @@ impl Client {
             Err(DownloadError::SongAlreadyDownloaded)
         }
     }
+    pub fn delete(&self, song: &Song) -> io::Result<()> {
+        fs::remove_file(song.path())
+    }
     pub fn save_current_playlist(&self, name: &str) {
         let playlist = self.playlist.lock().unwrap();
 
@@ -226,7 +230,9 @@ impl Client {
 }
 
 // bug tracker
-// adding song alrady added
-// 100% cpu
-// optomizartons
-// storing if a song is downlaod in db to cut down and io calls
+// adding song already added
+// 100% CPU usage
+// crashes if first char in search is a space fix by using .trim_start() or .trim() on search
+// query
+// optimizations
+// storing if a song is downloaded in db to cut down and I/O calls
