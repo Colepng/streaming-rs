@@ -46,15 +46,31 @@ impl<T> StatefulList<T> {
         }
     }
 
-    // fn unselect(&mut self) {
-    //     self.state.select(None);
-    // }
-
     pub fn get_selected(&mut self) -> Option<&T> {
         if let Some(pos) = self.state.selected() {
             Some(&self.items[pos])
         } else {
             None
+        }
+    }
+
+    pub fn index(&self) -> Option<usize> {
+        self.state.selected()
+    }
+
+    pub fn is_out_of_bounds(&self) -> bool {
+        if let Some(pos) = self.state.selected() {
+            self.items.len() <= pos
+        } else {
+            false
+        }
+    }
+
+    pub fn fix_out_of_bounds(&mut self) {
+        if !self.items.is_empty() {
+            self.state.select(Some(self.items.len() - 1));
+        } else {
+            self.state.select(None);
         }
     }
 }

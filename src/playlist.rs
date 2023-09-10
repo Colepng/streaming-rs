@@ -31,6 +31,10 @@ impl Playlist {
             } else if *self_pos > pos {
                 *self_pos -= 1;
             }
+
+            if *self_pos == 0 {
+                self.pos = None;
+            }
         }
     }
 

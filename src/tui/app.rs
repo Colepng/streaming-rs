@@ -54,7 +54,7 @@ impl<'a> App<'a> {
             }
             // queue
             1 => {
-                if self.queue.get_selected().is_some() {
+                if self.queue.state.selected().is_some() {
                     client.play_n(self.queue.state.selected().unwrap());
                 }
             }
@@ -105,6 +105,13 @@ impl<'a> App<'a> {
         match key {
             KeyCode::Char(char) => match char {
                 ' ' => client.toggle(),
+                'd' => {
+                    client.remove_from_queue(self.queue.index().unwrap());
+                    self.queue.items = client.get_songs();
+                    if self.queue.is_out_of_bounds() {
+                        self.queue.fix_out_of_bounds();
+                    }
+                }
                 _ => {}
             },
             _ => {}

@@ -59,6 +59,11 @@ pub fn render_search<B: Backend>(frame: &mut Frame<B>, app: &mut App, area: Rect
 }
 
 pub fn render_queue<B: Backend>(frame: &mut Frame<B>, app: &mut App, area: Rect, client: &Client) {
+    // maybe move some place else
+    if app.queue.state.selected().is_none() && !app.queue.items.is_empty() {
+        app.queue.state.select(Some(0));
+    }
+
     let songs: Vec<ListItem> = app
         .queue
         .items
