@@ -34,13 +34,13 @@ async fn main() -> Result<(), Box<std::io::Error>> {
 
     client.init();
 
-    let mut app = App::new();
+    let mut app = App::new(&mut client).await;
 
     let mut search_results = None;
 
     loop {
         terminal.draw(|frame| {
-            render(frame, &mut app);
+            render(frame, &mut app, &mut client);
         })?;
         app.queue.items = client.get_songs();
         if event::poll(Duration::from_millis(250))? {
@@ -73,15 +73,13 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                             }
                         }
                         KeyCode::Down => {
-                            app.search_results.next();
+                            app.next_item();
                         }
                         KeyCode::Up => {
-                            app.search_results.previous();
+                            app.previous_item();
                         }
                         KeyCode::Enter => {
-                            if let Some(song) = app.search_results.get_selected() {
-                                client.add_to_queue(song);
-                            }
+                            app.select(&mut client);
                         }
                         KeyCode::Esc => {
                             break;
