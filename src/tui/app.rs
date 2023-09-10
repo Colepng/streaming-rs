@@ -10,7 +10,7 @@ pub struct App<'a> {
     pub queue: StatefulList<Song>,
     pub library: StatefulList<Song>,
     pub search_bar: String,
-    pub search_future: Option<tokio::task::JoinHandle<Vec<Song>>>,
+    pub search_future: Option<tokio::task::JoinHandle<Result<Vec<Song>, streaming::SearchError>>>,
     pub tabs: TabsState<'a>,
 }
 

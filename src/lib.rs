@@ -32,34 +32,40 @@ pub fn buffer(song: &Song) -> std::io::Result<Vec<u8>> {
     Ok(buffer)
 }
 
+#[derive(Debug)]
+pub enum SearchError {
+    Timeout,
+}
 // fn search(input: &str) -> Vec<(String, Option<TrackId<'static>>)>{
-pub async fn search(input: String) -> Vec<Song> {
+pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
     let creds = Credentials::from_env().unwrap();
     let spotify = ClientCredsSpotify::new(creds);
-    spotify.request_token().unwrap();
-
-    let mut names: Vec<FullTrack> = Vec::new();
-    let search_resault = spotify
-        .search(
-            input.as_str(),
-            rspotify::model::SearchType::Track,
-            None,
-            None,
-            None,
-            None,
-        )
-        .unwrap();
-    match search_resault {
-        SearchResult::Tracks(n) => {
-            names = n.items;
+    if spotify.request_token().is_ok() {
+        let mut names: Vec<FullTrack> = Vec::new();
+        let search_resault = spotify
+            .search(
+                input.as_str(),
+                rspotify::model::SearchType::Track,
+                None,
+                None,
+                None,
+                None,
+                )
+            .unwrap();
+        match search_resault {
+            SearchResult::Tracks(n) => {
+                names = n.items;
+            }
+            _ => {}
         }
-        _ => {}
-    }
 
-    names
-        .into_iter()
-        .map(|x| Song::new(&x))
-        .collect::<Vec<Song>>()
+        Ok(names
+           .into_iter()
+           .map(|x| Song::new(&x))
+           .collect::<Vec<Song>>())
+    } else {
+        Err(SearchError::Timeout)
+    }
 }
 
 pub enum DownloadError {

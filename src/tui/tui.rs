@@ -74,7 +74,9 @@ async fn main() -> Result<(), Box<std::io::Error>> {
         }
         if let Some(ref handle) = app.search_future {
             if handle.is_finished() {
-                app.search_results.items = app.search_future.unwrap().await.unwrap();
+                if let Ok(result) = app.search_future.unwrap().await.unwrap() {
+                    app.search_results.items = result;
+                }
                 app.search_future = None;
             }
         }

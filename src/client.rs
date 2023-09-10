@@ -33,7 +33,7 @@ async fn main_async() -> std::io::Result<()> {
                 stdout.flush()?;
 
                 stdin.read_line(&mut input)?;
-                let result = search(input.trim().to_owned()).await;
+                let result = search(input.trim().to_owned()).await.unwrap();
                 input.clear();
 
                 // TODO improve
