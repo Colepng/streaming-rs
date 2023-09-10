@@ -72,7 +72,7 @@ impl<'a> App<'a> {
         match self.tabs.index {
             0 => self.handle_search_tab_input(input),
             1 => self.handle_queue_tab_input(input, client).await,
-            2 => self.handle_library_tab_input(input, client),
+            2 => self.handle_library_tab_input(input, client).await,
             _ => {}
         }
     }
@@ -127,7 +127,7 @@ impl<'a> App<'a> {
         }
     }
 
-    fn handle_library_tab_input(&mut self, key: KeyCode, client: &mut Client) {
+    async fn handle_library_tab_input(&mut self, key: KeyCode, client: &mut Client) {
         match key {
             KeyCode::Char(char) => match char {
                 ' ' => client.toggle(),
@@ -136,12 +136,29 @@ impl<'a> App<'a> {
                         let song = song.clone();
                         let client = client.clone();
                         tokio::spawn(async move {
-                            client.download(&song).await;
+                            let _ = client.download(&song).await;
                         });
                     }
                 }
                 'D' => {
-                    client.delete(self.library.get_selected().unwrap());
+                    let _ = client.delete(self.library.get_selected().unwrap());
+                }
+                'r' => {
+                    if let Some(song) = self.library.get_selected() {
+                        if song.is_downloaded() && client.delete(song).is_ok() {
+                            client.remove_song(song).await;
+                            self.library.items = client.search_local("").await;
+                            if self.library.is_out_of_bounds() {
+                                self.library.fix_out_of_bounds();
+                            }
+                        } else if !song.is_downloaded() {
+                            client.remove_song(song).await;
+                            self.library.items = client.search_local("").await;
+                            if self.library.is_out_of_bounds() {
+                                self.library.fix_out_of_bounds();
+                            }
+                        }
+                    }
                 }
                 _ => {}
             },

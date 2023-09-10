@@ -50,7 +50,7 @@ pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
                 None,
                 None,
                 None,
-                )
+            )
             .unwrap();
         match search_resault {
             SearchResult::Tracks(n) => {
@@ -60,9 +60,9 @@ pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
         }
 
         Ok(names
-           .into_iter()
-           .map(|x| Song::new(&x))
-           .collect::<Vec<Song>>())
+            .into_iter()
+            .map(|x| Song::new(&x))
+            .collect::<Vec<Song>>())
     } else {
         Err(SearchError::Timeout)
     }
@@ -241,4 +241,4 @@ impl Client {
 // crashes if first char in search is a space fix by using .trim_start() or .trim() on search
 // query
 // optimizations
-// storing if a song is downloaded in db to cut down and I/O calls
+// storing if a song is downloaded in db to cut down on I/O calls
