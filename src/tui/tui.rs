@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<std::io::Error>> {
                             app.tabs.next();
                         }
                         key => {
-                            app.handle_tabs_input(&mut client, key);
+                            app.handle_tabs_input(&mut client, key).await;
                         }
                     }
                 }

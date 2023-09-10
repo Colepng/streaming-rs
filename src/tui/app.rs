@@ -68,10 +68,10 @@ impl<'a> App<'a> {
         }
     }
 
-    pub fn handle_tabs_input(&mut self, client: &mut Client, input: KeyCode) {
+    pub async fn handle_tabs_input(&mut self, client: &mut Client, input: KeyCode) {
         match self.tabs.index {
             0 => self.handle_search_tab_input(input),
-            1 => self.handle_queue_tab_input(input, client),
+            1 => self.handle_queue_tab_input(input, client).await,
             2 => self.handle_library_tab_input(input, client),
             _ => {}
         }
@@ -101,7 +101,7 @@ impl<'a> App<'a> {
         }
     }
 
-    fn handle_queue_tab_input(&mut self, key: KeyCode, client: &mut Client) {
+    async fn handle_queue_tab_input(&mut self, key: KeyCode, client: &mut Client) {
         match key {
             KeyCode::Char(char) => match char {
                 ' ' => client.toggle(),
@@ -110,6 +110,15 @@ impl<'a> App<'a> {
                     self.queue.items = client.get_songs();
                     if self.queue.is_out_of_bounds() {
                         self.queue.fix_out_of_bounds();
+                    }
+                }
+                'a' => {
+                    if let Some(song) = self.queue.get_selected() {
+                        client.add_song(&song).await;
+                        self.library.items = client.search_local("").await;
+                        if self.library.is_out_of_bounds() {
+                            self.library.fix_out_of_bounds();
+                        }
                     }
                 }
                 _ => {}
