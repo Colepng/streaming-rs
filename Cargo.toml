@@ -1,22 +1,20 @@
+[workspace]
+members = ["tui"]
+
 [package]
 name = "streaming"
 version = "0.1.0"
 edition = "2021"
 default-run = "server"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 bitcode = { version = "0.4.0", features = [ "serde" ] }
-crossterm = "0.27.0"
 futures = "0.3.28"
 rand = "0.8.5"
-ratatui = { version = "0.23.0", features = ["all-widgets"] }
 rodio = { git = "https://github.com/RustAudio/rodio.git" }
 rspotify = { version = "0.11.7", features = ["env-file", "client-ureq", "ureq-rustls-tls"], default-features = false }
 serde = "1.0.188"
 sqlx = { version = "0.7.1", features = [ "runtime-async-std", "tls-rustls", "sqlite" ] }
-tokio = { version = "1.32.0", features = ["full"] }
 
 [lib]
 name = "streaming"
@@ -29,7 +27,3 @@ path = "src/server.rs"
 [[bin]]
 name = "client"
 path = "src/client.rs"
-
-[[bin]]
-name = "tui"
-path = "src/tui/tui.rs"
