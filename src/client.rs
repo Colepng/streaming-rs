@@ -15,7 +15,7 @@ async fn main_async() -> std::io::Result<()> {
     // Get a output stream handle to the default physical sound device
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let mut client = Client::new(stream_handle).await;
+    let mut client = Client::new(&stream_handle).await;
 
     client.init();
 
