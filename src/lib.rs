@@ -36,6 +36,7 @@ pub fn buffer(song: &Song) -> std::io::Result<Vec<u8>> {
 #[derive(Debug)]
 pub enum SearchError {
     Timeout,
+    RequestToken,
 }
 // fn search(input: &str) -> Vec<(String, Option<TrackId<'static>>)>{
 pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
@@ -52,7 +53,7 @@ pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
                 None,
                 None,
             )
-            .unwrap();
+            .map_err(|_| SearchError::Timeout)?;
         match search_resault {
             SearchResult::Tracks(n) => {
                 names = n.items;
@@ -65,7 +66,7 @@ pub async fn search(input: String) -> Result<Vec<Song>, SearchError> {
             .map(|x| Song::new(&x))
             .collect::<Vec<Song>>())
     } else {
-        Err(SearchError::Timeout)
+        Err(SearchError::RequestToken)
     }
 }
 
@@ -83,7 +84,7 @@ pub struct Client {
 }
 
 impl Client {
-    pub async fn new(stream_handle: OutputStreamHandle) -> Self {
+    pub async fn new(stream_handle: &OutputStreamHandle) -> Self {
         Client {
             playlist: Arc::new(Mutex::new(Playlist::new())),
             sink: Arc::new(Mutex::new(Sink::try_new(&stream_handle).unwrap())),
