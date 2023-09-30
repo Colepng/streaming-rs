@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use crate::song::Song;
 
 pub async fn db() -> SqlitePool {
-    SqlitePool::connect("sqlite:library.db").await.unwrap()
+    SqlitePool::connect("sqlite:/home/cole/Documents/projects/streaming-rs/tui/library.db").await.unwrap()
 }
 
 pub async fn add_song(song: &Song, pool: &SqlitePool) {

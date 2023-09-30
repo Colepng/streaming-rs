@@ -24,16 +24,16 @@ impl Song {
     }
     pub fn is_downloaded(&self) -> bool {
         // path subject to change
-        Path::new(format!("Library/{}/{}/{}.mp3", self.artist, self.album, self.name).as_str())
+        Path::new(format!("/home/cole/Documents/projects/streaming-rs/tui/Library/{}/{}/{}.mp3", self.artist, self.album, self.name).as_str())
             .exists()
     }
     pub fn path(&self) -> PathBuf {
         PathBuf::from(format!(
-            "Library/{}/{}/{}.mp3",
+            "/home/cole/Documents/projects/streaming-rs/tui/Library/{}/{}/{}.mp3",
             self.artist, self.album, self.name
         ))
     }
     pub fn dir(&self) -> PathBuf {
-        PathBuf::from(format!("Library/{}/{}/", self.artist, self.album))
+        PathBuf::from(format!("/home/cole/Documents/projects/streaming-rs/tui/Library/{}/{}/", self.artist, self.album))
     }
 }
