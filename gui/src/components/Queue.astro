@@ -1,0 +1,63 @@
+---
+---
+
+<queue-custom>
+<ul>
+</ul>
+<button/>
+</queue-custom>
+
+<script>
+import { invoke } from "@tauri-apps/api";
+
+class Queue extends HTMLElement {
+    constructor() {
+        super();
+
+        invoke('get_songs').then((result) => {
+                if (result instanceof Array) {
+                const items = this.querySelectorAll(`li`);
+                const len = items.length;
+                // need to remove old items from queue
+                result.forEach((track, index) => {
+                        if (index < len) {
+                            if (items[index] !== null) {
+                                items[index].innerHTML = `${track.name}`;
+                            }
+                        } else {
+                            const item = document.createElement('li');
+                            item.innerHTML = `${track.name}`;
+                            this.querySelector('ul')?.appendChild(item);
+                        }
+                    });
+                }
+        }); 
+
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    invoke('get_songs').then((result) => {
+                            if (result instanceof Array) {
+                            const items = this.querySelectorAll(`li`);
+                            const len = items.length;
+                            // need to remove old items from queue
+                            result.forEach((track, index) => {
+                                if (index < len) {
+                                    if (items[index] !== null) {
+                                        items[index].innerHTML = `${track.name}`;
+                                    }
+                                } else {
+                                    const item = document.createElement('li');
+                                    item.innerHTML = `${track.name}`;
+                                    this.querySelector('ul')?.appendChild(item);
+                                }
+                            });
+                        }
+                }); 
+            });
+        });
+    }
+}
+
+customElements.define('queue-custom', Queue);
+</script>

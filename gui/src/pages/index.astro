@@ -1,22 +1,32 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Player from '../components/player.astro';
+import Queue from '../components/Queue.astro';
 ---
 
 <Layout title="Welcome to Astro.">
 	<main>
-    <p>hello world</p>
+    <Sidebar class="sidebar"/>
+    <Player/>
+    <Queue/>
 	</main>
 </Layout>
 
+
 <style>
+    /* note to self can use queue components for both searching and listing current songs */
 	main {
 		margin: auto;
 		padding: 1rem;
-		width: 800px;
 		max-width: calc(100% - 2rem);
+        width: 100%;
+        height: 100%;
 		color: white;
 		font-size: 20px;
 		line-height: 1.6;
+        display: inline-grid;
+        gap: 10, 10;
 	}
 	.astro-a {
 		position: absolute;

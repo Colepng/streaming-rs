@@ -1688,8 +1688,10 @@ dependencies = [
 name = "gui"
 version = "0.0.0"
 dependencies = [
+ "rodio",
  "serde",
  "serde_json",
+ "streaming",
  "tauri",
  "tauri-build",
 ]

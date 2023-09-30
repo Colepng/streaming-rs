@@ -1,0 +1,34 @@
+---
+---
+
+<div>
+    <button id="prev-button">
+    prev
+    </button>
+    <button id="pause-button">
+    pause
+    </button>
+    <button id="skip-button">
+    skip
+    </button>
+</div>
+
+<script>
+import { invoke } from "@tauri-apps/api";
+
+    let prevButton = document.getElementById("prev-button");
+    prevButton?.addEventListener('click', () => {
+        invoke('prev');
+    });
+
+    let pauseButton = document.getElementById("pause-button");
+    pauseButton?.addEventListener('click', () => {
+        invoke('toggle');
+    });
+
+    let skipButton = document.getElementById("skip-button");
+    skipButton?.addEventListener('click', () => {
+        invoke('skip');
+    });
+
+</script>

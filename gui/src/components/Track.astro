@@ -1,0 +1,19 @@
+---
+interface Props {
+	title: string;
+	artist: string;
+    id: string
+    // href: string;
+}
+
+const { title, artist, id} = Astro.props;
+---
+
+<track-custom>
+    <div id={id}>
+        <p/>
+    </div>
+</track-custom>
+
+<script src="../scripts/track.ts">
+</script>
